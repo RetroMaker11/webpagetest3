@@ -62,37 +62,36 @@ function createMediaItem(file, index) {
     const mediaItem = document.createElement('div');
     mediaItem.className = 'image-item';
     
-    const directLink = file.webContentLink.replace('&export=download', '');
     const thumbnailLink = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`;
     
     if (file.mimeType.startsWith('image/')) {
         mediaItem.innerHTML = `
-            <img src="${thumbnailLink}" alt="${file.name}" loading="lazy" data-full-img="${directLink}">
+            <img src="${thumbnailLink}" alt="${file.name}" loading="lazy" data-file-id="${file.id}">
         `;
     } else if (file.mimeType.startsWith('video/')) {
         mediaItem.innerHTML = `
-            <video src="${directLink}" poster="${thumbnailLink}" preload="metadata" muted></video>
+            <video poster="${thumbnailLink}" preload="metadata" muted data-file-id="${file.id}"></video>
         `;
     }
     
-    mediaItem.querySelector('img, video').addEventListener('click', () => openMiniWindow(directLink, file.name, file.id, file.mimeType));
+    mediaItem.querySelector('img, video').addEventListener('click', () => openMiniWindow(file.id, file.name, file.mimeType));
     
     return mediaItem;
 }
 
-function openMiniWindow(mediaUrl, caption, fileId, mimeType) {
+function openMiniWindow(fileId, caption, mimeType) {
     let mediaContent;
     if (mimeType.startsWith('image/')) {
-        mediaContent = `<img src="${mediaUrl}" alt="${caption}" style="max-width: 100%; height: auto;">`;
+        mediaContent = `<img src="https://drive.google.com/uc?export=view&id=${fileId}" alt="${caption}" style="max-width: 100%; height: auto;">`;
     } else if (mimeType.startsWith('video/')) {
-        mediaContent = `<video src="${mediaUrl}" controls muted style="max-width: 100%; height: auto;"></video>`;
+        mediaContent = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" width="640" height="480" allow="autoplay" allowfullscreen></iframe>`;
     }
 
     miniWindow.innerHTML = `
         <div class="mini-window-content">
             ${mediaContent}
             <p>${caption}</p>
-            <a href="${mediaUrl}" target="_blank" rel="noopener noreferrer">Abrir y Descargar</a>
+            <a href="https://drive.google.com/uc?export=download&id=${fileId}" target="_blank" rel="noopener noreferrer">Descargar</a>
             <button onclick="closeMiniWindow()">Cerrar</button>
         </div>
     `;

@@ -82,7 +82,7 @@ function createMediaItem(file, index) {
 function openMiniWindow(fileId, caption, mimeType) {
     let mediaContent;
     if (mimeType.startsWith('image/')) {
-        mediaContent = `<img src="https://drive.google.com/uc?export=view&id=${fileId}" alt="${caption}" style="max-width: 100%; height: auto;">`;
+        mediaContent = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" width="640" height="480" allow="autoplay" allowfullscreen></iframe>`;
     } else if (mimeType.startsWith('video/')) {
         mediaContent = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" width="640" height="480" allow="autoplay" allowfullscreen></iframe>`;
     }

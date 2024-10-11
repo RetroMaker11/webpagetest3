@@ -8,6 +8,14 @@ const miniWindow = document.createElement('div');
 miniWindow.id = 'mini-window';
 document.body.appendChild(miniWindow);
 
+const searchIcon = document.getElementById('search-icon');
+const searchInput = document.getElementById('search-input');
+const backButton = document.getElementById('back-button');
+const muteButton = document.getElementById('mute-button');
+let allImages = [];
+let isSearchActive = false;
+let isMuted = false;
+
 function loadGoogleDriveAPI() {
     const script = document.createElement('script');
     script.src = 'https://apis.google.com/js/api.js';
@@ -32,12 +40,22 @@ function loadImages() {
     }).then(response => {
         const files = response.result.files;
         if (files && files.length > 0) {
-            files.forEach((file, index) => {
-                const imageItem = createImageItem(file, index);
-                imageGallery.appendChild(imageItem);
-            });
+            allImages = files;
+            displayImages(allImages);
         }
     }).catch(console.error);
+}
+
+function displayImages(images) {
+    imageGallery.innerHTML = '';
+    if (images.length === 0) {
+        imageGallery.innerHTML = '<p id="no-results">No se han encontrado resultados</p>';
+        return;
+    }
+    images.forEach((file, index) => {
+        const imageItem = createImageItem(file, index);
+        imageGallery.appendChild(imageItem);
+    });
 }
 
 function createImageItem(file, index) {
@@ -73,33 +91,78 @@ function closeMiniWindow() {
 }
 
 function playMusic() {
-    backgroundMusic.volume = 0.3; // Ajusta el volumen al 30%
-    backgroundMusic.play().then(() => {
-        console.log('La música comenzó a reproducirse');
-        playMusicBtn.style.display = 'none';
-    }).catch((error) => {
-        console.error('No se pudo reproducir la música automáticamente:', error);
-        playMusicBtn.style.display = 'block';
-    });
+    if (!isMuted) {
+        backgroundMusic.volume = 0.3;
+        backgroundMusic.play().then(() => {
+            console.log('La música comenzó a reproducirse');
+            playMusicBtn.style.display = 'none';
+        }).catch((error) => {
+            console.error('No se pudo reproducir la música automáticamente:', error);
+            playMusicBtn.style.display = 'block';
+        });
+    }
 }
 
-// Intentar reproducir la música en respuesta a varias interacciones del usuario
+function performSearch() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filteredImages = allImages.filter(file => 
+        file.name.toLowerCase().includes(searchTerm)
+    );
+    displayImages(filteredImages);
+    isSearchActive = true;
+    backButton.style.display = 'block';
+    history.pushState({ searchTerm }, '', `?search=${encodeURIComponent(searchTerm)}`);
+}
+
+function resetSearch() {
+    searchInput.value = '';
+    displayImages(allImages);
+    isSearchActive = false;
+    backButton.style.display = 'none';
+    history.pushState(null, '', window.location.pathname);
+}
+
+function toggleMute() {
+    if (isMuted) {
+        backgroundMusic.play();
+        muteButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+    } else {
+        backgroundMusic.pause();
+        muteButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
+    }
+    isMuted = !isMuted;
+}
+
 document.body.addEventListener('click', playMusic, { once: true });
 document.body.addEventListener('touchstart', playMusic, { once: true });
 document.body.addEventListener('keydown', playMusic, { once: true });
 
 window.addEventListener('load', () => {
-    // Intentar reproducir la música automáticamente al cargar la página
     playMusic();
-    
-    // Mantener el botón de reproducción por si falla la reproducción automática
     playMusicBtn.addEventListener('click', playMusic);
-    
     loadGoogleDriveAPI();
+    
+    searchIcon.addEventListener('click', () => {
+        searchInput.classList.toggle('active');
+        if (searchInput.classList.contains('active')) {
+            searchInput.focus();
+        } else {
+            resetSearch();
+        }
+    });
+
+    
+
+    searchInput.addEventListener('input', performSearch);
+    backButton.addEventListener('click', resetSearch);
+    muteButton.addEventListener('click', toggleMute);
 });
 
-// Intentar reproducir la música cuando la ventana obtiene el foco
 window.addEventListener('focus', playMusic);
 
-// Intentar reproducir la música periódicamente
-setInterval(playMusic, 5000);
+// Handle browser's back button
+window.addEventListener('popstate', function(event) {
+    if (isSearchActive) {
+        resetSearch();
+    }
+});

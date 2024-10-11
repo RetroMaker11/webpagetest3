@@ -12,7 +12,7 @@ const searchIcon = document.getElementById('search-icon');
 const searchInput = document.getElementById('search-input');
 const backButton = document.getElementById('back-button');
 const muteButton = document.getElementById('mute-button');
-let allImages = [];
+let allMedia = [];
 let isSearchActive = false;
 let isMuted = false;
 
@@ -29,57 +29,70 @@ function initClient() {
     gapi.client.init({
         apiKey: API_KEY,
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-    }).then(loadImages).catch(console.error);
+    }).then(loadMedia).catch(console.error);
 }
 
-function loadImages() {
+function loadMedia() {
     gapi.client.drive.files.list({
-        q: `'${FOLDER_ID}' in parents and mimeType contains 'image/'`,
-        fields: 'files(id, name, webContentLink)',
+        q: `'${FOLDER_ID}' in parents and (mimeType contains 'image/' or mimeType contains 'video/')`,
+        fields: 'files(id, name, webContentLink, mimeType)',
         orderBy: 'name'
     }).then(response => {
         const files = response.result.files;
         if (files && files.length > 0) {
-            allImages = files;
-            displayImages(allImages);
+            allMedia = files;
+            displayMedia(allMedia);
         }
     }).catch(console.error);
 }
 
-function displayImages(images) {
+function displayMedia(media) {
     imageGallery.innerHTML = '';
-    if (images.length === 0) {
+    if (media.length === 0) {
         imageGallery.innerHTML = '<p id="no-results">No se han encontrado resultados</p>';
         return;
     }
-    images.forEach((file, index) => {
-        const imageItem = createImageItem(file, index);
-        imageGallery.appendChild(imageItem);
+    media.forEach((file, index) => {
+        const mediaItem = createMediaItem(file, index);
+        imageGallery.appendChild(mediaItem);
     });
 }
 
-function createImageItem(file, index) {
-    const imageItem = document.createElement('div');
-    imageItem.className = 'image-item';
+function createMediaItem(file, index) {
+    const mediaItem = document.createElement('div');
+    mediaItem.className = 'image-item';
     
     const directLink = file.webContentLink.replace('&export=download', '');
     const thumbnailLink = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`;
     
-    imageItem.innerHTML = `
-        <img src="${thumbnailLink}" alt="${file.name}" loading="lazy" data-full-img="${directLink}">
-    `;
+    if (file.mimeType.startsWith('image/')) {
+        mediaItem.innerHTML = `
+            <img src="${thumbnailLink}" alt="${file.name}" loading="lazy" data-full-img="${directLink}">
+        `;
+    } else if (file.mimeType.startsWith('video/')) {
+        mediaItem.innerHTML = `
+            <video src="${directLink}" poster="${thumbnailLink}" preload="metadata" muted></video>
+        `;
+    }
     
-    imageItem.querySelector('img').addEventListener('click', () => openMiniWindow(directLink, file.name, file.id));
+    mediaItem.querySelector('img, video').addEventListener('click', () => openMiniWindow(directLink, file.name, file.id, file.mimeType));
     
-    return imageItem;
+    return mediaItem;
 }
 
-function openMiniWindow(imageUrl, caption, fileId) {
+function openMiniWindow(mediaUrl, caption, fileId, mimeType) {
+    let mediaContent;
+    if (mimeType.startsWith('image/')) {
+        mediaContent = `<img src="${mediaUrl}" alt="${caption}" style="max-width: 100%; height: auto;">`;
+    } else if (mimeType.startsWith('video/')) {
+        mediaContent = `<video src="${mediaUrl}" controls muted style="max-width: 100%; height: auto;"></video>`;
+    }
+
     miniWindow.innerHTML = `
         <div class="mini-window-content">
-            <iframe src="https://drive.google.com/file/d/${fileId}/preview" width="640" height="480" allow="autoplay"></iframe>
+            ${mediaContent}
             <p>${caption}</p>
-            <a href="${imageUrl}" target="_blank" rel="noopener noreferrer">Abrir y Descargar</a>
+            <a href="${mediaUrl}" target="_blank" rel="noopener noreferrer">Abrir y Descargar</a>
             <button onclick="closeMiniWindow()">Cerrar</button>
         </div>
     `;
@@ -105,10 +118,10 @@ function playMusic() {
 
 function performSearch() {
     const searchTerm = searchInput.value.toLowerCase();
-    const filteredImages = allImages.filter(file => 
+    const filteredMedia = allMedia.filter(file => 
         file.name.toLowerCase().includes(searchTerm)
     );
-    displayImages(filteredImages);
+    displayMedia(filteredMedia);
     isSearchActive = true;
     backButton.style.display = 'block';
     history.pushState({ searchTerm }, '', `?search=${encodeURIComponent(searchTerm)}`);
@@ -116,7 +129,7 @@ function performSearch() {
 
 function resetSearch() {
     searchInput.value = '';
-    displayImages(allImages);
+    displayMedia(allMedia);
     isSearchActive = false;
     backButton.style.display = 'none';
     history.pushState(null, '', window.location.pathname);
@@ -150,8 +163,6 @@ window.addEventListener('load', () => {
             resetSearch();
         }
     });
-
-    
 
     searchInput.addEventListener('input', performSearch);
     backButton.addEventListener('click', resetSearch);

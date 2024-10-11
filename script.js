@@ -36,7 +36,8 @@ function loadMedia() {
     gapi.client.drive.files.list({
         q: `'${FOLDER_ID}' in parents and (mimeType contains 'image/' or mimeType contains 'video/')`,
         fields: 'files(id, name, webContentLink, mimeType)',
-        orderBy: 'name'
+        orderBy: 'name',
+        pageSize: 320 // Solicitar hasta 320 archivos
     }).then(response => {
         const files = response.result.files;
         if (files && files.length > 0) {
@@ -56,6 +57,7 @@ function displayMedia(media) {
         const mediaItem = createMediaItem(file, index);
         imageGallery.appendChild(mediaItem);
     });
+    lazyLoadMedia();
 }
 
 function createMediaItem(file, index) {
@@ -66,17 +68,42 @@ function createMediaItem(file, index) {
     
     if (file.mimeType.startsWith('image/')) {
         mediaItem.innerHTML = `
-            <img src="${thumbnailLink}" alt="${file.name}" loading="lazy" data-file-id="${file.id}">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="${thumbnailLink}" alt="${file.name}" loading="lazy" data-file-id="${file.id}">
         `;
     } else if (file.mimeType.startsWith('video/')) {
         mediaItem.innerHTML = `
-            <video poster="${thumbnailLink}" preload="metadata" muted data-file-id="${file.id}"></video>
+            <video data-poster="${thumbnailLink}" preload="none" muted data-file-id="${file.id}"></video>
         `;
     }
     
     mediaItem.querySelector('img, video').addEventListener('click', () => openMiniWindow(file.id, file.name, file.mimeType));
     
     return mediaItem;
+}
+
+function lazyLoadMedia() {
+    const mediaItems = document.querySelectorAll('img[data-src], video[data-poster]');
+    const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const mediaItem = entry.target;
+                if (mediaItem.tagName === 'IMG') {
+                    mediaItem.src = mediaItem.dataset.src;
+                } else if (mediaItem.tagName === 'VIDEO') {
+                    mediaItem.poster = mediaItem.dataset.poster;
+                }
+                observer.unobserve(mediaItem);
+            }
+        });
+    }, options);
+
+    mediaItems.forEach(item => observer.observe(item));
 }
 
 function openMiniWindow(fileId, caption, mimeType) {
@@ -121,6 +148,7 @@ function performSearch() {
         file.name.toLowerCase().includes(searchTerm)
     );
     displayMedia(filteredMedia);
+    lazyLoadMedia();
     isSearchActive = true;
     backButton.style.display = 'block';
     history.pushState({ searchTerm }, '', `?search=${encodeURIComponent(searchTerm)}`);
@@ -129,6 +157,7 @@ function performSearch() {
 function resetSearch() {
     searchInput.value = '';
     displayMedia(allMedia);
+    lazyLoadMedia();
     isSearchActive = false;
     backButton.style.display = 'none';
     history.pushState(null, '', window.location.pathname);

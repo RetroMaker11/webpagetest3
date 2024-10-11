@@ -236,3 +236,17 @@ h1 {
     transform: translateY(1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+/* Agregar al final del archivo CSS existente */
+
+.image-item video {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.mini-window-content video {
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+    margin-bottom: 10px;
+}

@@ -42,10 +42,14 @@ header {
 
 h1 {
     margin: 0;
-    font-size: 2.5em;
+    font-size: 3em;
     font-weight: 700;
-    color: #FF69B4;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    color: white;
+    text-shadow: 
+        -2px -2px 0 #000,  
+         2px -2px 0 #000,
+        -2px  2px 0 #000,
+         2px  2px 0 #000;
 }
 
 #image-gallery {
@@ -236,7 +240,6 @@ h1 {
     transform: translateY(1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-/* Agregar al final del archivo CSS existente */
 
 .image-item video {
     width: 100%;

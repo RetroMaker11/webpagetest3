@@ -167,7 +167,13 @@ function changeMusic() {
     currentMusicIndex = (currentMusicIndex + 1) % musicTracks.length;
     backgroundMusic.src = musicTracks[currentMusicIndex];
     if (!isMuted) {
-        playMusic();
+        backgroundMusic.play().then(() => {
+            console.log('La nueva pista comenzó a reproducirse');
+            playMusicBtn.style.display = 'none';
+        }).catch((error) => {
+            console.error('No se pudo reproducir la nueva pista automáticamente:', error);
+            playMusicBtn.style.display = 'block';
+        });
     }
 }
 
@@ -282,7 +288,7 @@ document.body.addEventListener('touchstart', playMusic, { once: true });
 document.body.addEventListener('keydown', playMusic, { once: true });
 
 window.addEventListener('load', () => {
-    playMusic();
+    //playMusic(); //Comentado para que no se reproduzca al cargar la página
     playMusicBtn.addEventListener('click', playMusic);
     loadGoogleDriveAPI();
     

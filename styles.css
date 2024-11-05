@@ -267,6 +267,20 @@ h1 {
     z-index: 2000;
     overflow-y: auto;
     padding: 20px;
+    box-sizing: border-box;
+}
+
+.favorites-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px 0;
 }
 
 .favorites-section h2 {
@@ -279,4 +293,8 @@ h1 {
          2px -2px 0 #000,
         -2px  2px 0 #000,
          2px  2px 0 #000;
-        }
+}
+
+.body-no-scroll {
+    overflow: hidden;
+}

@@ -24,9 +24,9 @@ let currentMusicIndex = 0;
 
 const musicTracks = [
     'https://www.cjoint.com/doc/24_10/NJjbyXchOLX_audio.mp3',
-    'https://www.cjoint.com/doc/24_11/NKfcJMKZA2Z_audio2.mp3',
-    'https://www.cjoint.com/doc/24_11/NKfcKVFD3AZ_audio3.mp3',
-    'https://www.cjoint.com/doc/24_11/NKfcLwTTdtZ_audio4.mp3'
+    'https://example.com/music2.mp3',
+    'https://example.com/music3.mp3',
+    'https://example.com/music4.mp3'
 ];
 
 function loadGoogleDriveAPI() {
@@ -152,7 +152,7 @@ function closeMiniWindow() {
 
 function playMusic() {
     if (!isMuted) {
-        backgroundMusic.volume = 0.25;
+        backgroundMusic.volume = 0.3;
         backgroundMusic.play().then(() => {
             console.log('La música comenzó a reproducirse');
             playMusicBtn.style.display = 'none';
@@ -264,11 +264,13 @@ function showFavorites() {
     displayMedia(favoriteItems, favoritesGrid);
     favoritesSection.style.display = 'block';
     backButton.style.display = 'block';
+    document.body.classList.add('body-no-scroll');
 }
 
 function hideFavorites() {
     favoritesSection.style.display = 'none';
     backButton.style.display = 'none';
+    document.body.classList.remove('body-no-scroll');
     if (favoritesSection.contains(miniWindow)) {
         document.body.appendChild(miniWindow);
         closeMiniWindow();

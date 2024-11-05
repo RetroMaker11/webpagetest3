@@ -24,9 +24,9 @@ let currentMusicIndex = 0;
 
 const musicTracks = [
     'https://www.cjoint.com/doc/24_10/NJjbyXchOLX_audio.mp3',
-    'https://example.com/music2.mp3',
-    'https://example.com/music3.mp3',
-    'https://example.com/music4.mp3'
+    'https://www.cjoint.com/doc/24_11/NKfcJMKZA2Z_audio2.mp3',
+    'https://www.cjoint.com/doc/24_11/NKfcKVFD3AZ_audio3.mp3',
+    'https://www.cjoint.com/doc/24_11/NKfcLwTTdtZ_audio4.mp3'
 ];
 
 function loadGoogleDriveAPI() {
@@ -74,8 +74,6 @@ function createMediaItem(file, index) {
     mediaItem.className = 'image-item';
     
     const thumbnailLink = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`;
-    
-    
     
     if (file.mimeType.startsWith('image/')) {
         mediaItem.innerHTML = `
@@ -135,7 +133,6 @@ function openMiniWindow(fileId, caption, mimeType) {
     `;
     miniWindow.style.display = 'block';
 
-    // Posicionar la mini ventana dentro de la sección de favoritos si está abierta
     if (favoritesSection.style.display === 'block') {
         favoritesSection.appendChild(miniWindow);
     } else {
@@ -152,7 +149,7 @@ function closeMiniWindow() {
 
 function playMusic() {
     if (!isMuted) {
-        backgroundMusic.volume = 0.3;
+        backgroundMusic.volume = 0.2;
         backgroundMusic.play().then(() => {
             console.log('La música comenzó a reproducirse');
             playMusicBtn.style.display = 'none';
@@ -166,15 +163,7 @@ function playMusic() {
 function changeMusic() {
     currentMusicIndex = (currentMusicIndex + 1) % musicTracks.length;
     backgroundMusic.src = musicTracks[currentMusicIndex];
-    if (!isMuted) {
-        backgroundMusic.play().then(() => {
-            console.log('La nueva pista comenzó a reproducirse');
-            playMusicBtn.style.display = 'none';
-        }).catch((error) => {
-            console.error('No se pudo reproducir la nueva pista automáticamente:', error);
-            playMusicBtn.style.display = 'block';
-        });
-    }
+    playMusic();
 }
 
 function performSearch() {
@@ -195,14 +184,14 @@ function resetSearch() {
 }
 
 function toggleMute() {
+    isMuted = !isMuted;
     if (isMuted) {
-        backgroundMusic.play();
-        muteButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-    } else {
         backgroundMusic.pause();
         muteButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
+    } else {
+        playMusic();
+        muteButton.innerHTML = '<i class="fas fa-volume-up"></i>';
     }
-    isMuted = !isMuted;
 }
 
 function addFavoriteIcons(container) {
@@ -283,14 +272,14 @@ function hideFavorites() {
     }
 }
 
-document.body.addEventListener('click', playMusic, { once: true });
-document.body.addEventListener('touchstart', playMusic, { once: true });
-document.body.addEventListener('keydown', playMusic, { once: true });
+function initializeAudio() {
+    backgroundMusic.src = musicTracks[currentMusicIndex];
+    playMusic();
+}
 
 window.addEventListener('load', () => {
-    //playMusic(); //Comentado para que no se reproduzca al cargar la página
-    playMusicBtn.addEventListener('click', playMusic);
     loadGoogleDriveAPI();
+    initializeAudio();
     
     searchIcon.addEventListener('click', () => {
         searchInput.classList.toggle('active');
@@ -306,9 +295,14 @@ window.addEventListener('load', () => {
     muteButton.addEventListener('click', toggleMute);
     favoritesButton.addEventListener('click', showFavorites);
     changeMusicButton.addEventListener('click', changeMusic);
+    playMusicBtn.addEventListener('click', playMusic);
 });
 
-window.addEventListener('focus', playMusic);
+window.addEventListener('focus', () => {
+    if (!isMuted && backgroundMusic.paused) {
+        playMusic();
+    }
+});
 
 window.addEventListener('popstate', function(event) {
     if (isSearchActive) {

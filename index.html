@@ -2,43 +2,67 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kawaii Wallpapers</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Coiny&family=Protest+Strike&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="video-background">
-        <video autoplay loop muted playsinline>
-            <source src="https://www.cjoint.com/doc/24_10/NJjbzJaO2lX_145040-785786195-small.mp4" type="video/mp4">
-        </video>
+    <!-- Background with floating shapes -->
+    <div class="background">
+        <div class="floating-shape circle"></div>
+        <div class="floating-shape triangle"></div>
+        <div class="floating-shape square"></div>
+        <div class="floating-shape circle"></div>
+        <div class="floating-shape triangle"></div>
+        <div class="floating-shape square"></div>
     </div>
-    <div class="content">
-        <header>
-            <h1>Kawaii Wallpapers</h1>
-            <div class="search-container">
-                <button id="search-icon" class="search-icon"><i class="fas fa-search"></i></button>
-                <input type="text" id="search-input" class="search-input" placeholder="Buscar fondos...">
-                <button id="mute-button" class="mute-button"><i class="fas fa-volume-up"></i></button>
-                <button id="change-music-button" class="change-music-button"><i class="fas fa-music"></i></button>
-                <button id="favorites-button" class="favorites-button"><i class="far fa-star"></i></button>
+
+    <!-- Header banner -->
+    <header class="header-banner">
+        <h1>Kawaii Wallpapers</h1>
+    </header>
+
+    <main>
+        <!-- Main image gallery -->
+        <div id="image-gallery" class="image-grid"></div>
+
+        <!-- Play music button -->
+        <button id="play-music" class="play-music-btn">Reproducir Música</button>
+    </main>
+
+    <!-- Search section -->
+    <div id="search-section" class="search-section">
+        <div class="search-header">
+            <button id="search-back-button"><i class="fas fa-arrow-left"></i></button>
+            <div class="search-input-container">
+                <input type="text" id="search-input" placeholder="Buscar fondos...">
+                <button id="search-button"><i class="fas fa-search"></i></button>
             </div>
-        </header>
-        <main id="image-gallery"></main>
-        <audio id="background-music" loop>
-            <source src="https://www.cjoint.com/doc/24_10/NJjbyXchOLX_audio.mp3" type="audio/mpeg">
-        </audio>
-        <button id="play-music" class="music-button" style="display: none;">Reproducir Música</button>
-    </div>
-    <div id="favorites-section" class="favorites-section">
-        <div class="favorites-content">
-            <h2>Favoritos</h2>
-            <div id="favorites-grid" class="favorites-grid"></div>
-            <button id="back-button">Atrás</button>
         </div>
+        <div id="search-results" class="image-grid"></div>
     </div>
-    <script src="https://apis.google.com/js/api.js"></script>
+
+    <!-- Favorites section -->
+    <div id="favorites-section" class="favorites-section">
+        <div class="favorites-header">
+            <button id="back-button"><i class="fas fa-arrow-left"></i></button>
+            <h2>Mis Favoritos</h2>
+        </div>
+        <div id="favorites-grid" class="image-grid"></div>
+    </div>
+
+    <!-- Navigation bar -->
+    <nav class="nav-bar">
+        <button id="search-icon"><i class="fas fa-search"></i></button>
+        <button id="mute-button"><i class="fas fa-volume-up"></i></button>
+        <button id="change-music-button"><i class="fas fa-music"></i></button>
+        <button id="favorites-button"><i class="fas fa-star"></i></button>
+    </nav>
+
+    <!-- Audio element -->
+    <audio id="background-music" loop></audio>
+
     <script src="script.js"></script>
 </body>
 </html>
